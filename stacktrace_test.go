@@ -14,17 +14,16 @@ import (
 
 func TestStacktrace(t *testing.T) {
 	strace := Stacktrace{
-		Raw:     getStacktrace(),
-		Recover: "this is test case",
+		Raw:          getStacktrace(),
+		Recover:      "this is test case",
+		StripSrcBase: true,
 	}
-
-	strace.initPath()
 
 	buf := &bytes.Buffer{}
 	strace.Print(buf)
 	t.Log(buf.String())
 
-	assert.Equal(t, 4, strace.RoutineCnt)
+	assert.Equal(t, 5, len(strace.GoRoutines))
 	assert.Equal(t, "goroutine 5 [running]:", strace.GoRoutines[0].Header)
 	assert.Equal(t, "goroutine 1 [running]:", strace.GoRoutines[1].Header)
 	assert.Equal(t, "goroutine 1 [IO wait]:", strace.GoRoutines[2].Header)
@@ -151,5 +150,21 @@ main.main()
 goroutine 17 [syscall, locked to thread]:
 runtime.goexit()
 	/usr/local/go/src/runtime/asm_amd64.s:2086 +0x1
+
+goroutine 18 [running]:
+testing.tRunner.func1(0xc0420ea0f0)
+        c:/Go/src/testing/testing.go:742 +0x2a4
+panic(0x5dd180, 0x6538f0)
+        c:/Go/src/runtime/panic.go:505 +0x237
+aahframework.org/aruntime%2ev0.(*Stacktrace).Parse(0xc04203df28)
+        C:/Users/jmadanagopal/go/src/aahframework.org/aruntime.v0/stacktrace.go:146 +0xb37
+aahframework.org/aruntime%2ev0.(*Stacktrace).Print(0xc04204bf28, 0x654960, 0xc0420cefc0)
+        C:/Users/jmadanagopal/go/src/aahframework.org/aruntime.v0/stacktrace.go:156 +0x446
+aahframework.org/aruntime%2ev0.TestMeStacktrace(0xc0420ea0f0)
+        C:/Users/jmadanagopal/go/src/aahframework.org/aruntime.v0/stacktrace_test.go:25 +0xc9
+testing.tRunner(0xc0420ea0f0, 0x63aa40)
+        c:/Go/src/testing/testing.go:777 +0xd7
+created by testing.(*T).Run
+        c:/Go/src/testing/testing.go:824 +0x2e7
 	`
 }
